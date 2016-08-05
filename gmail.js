@@ -3,66 +3,9 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 
-function enterTheDangerZone (auth) {
-  var spawn = require('child_process').spawn;
-  var five = require("johnny-five");
-  var board = new five.Board();
-
-  board.on("ready", function() {
-    var led0 = new five.Led(11);
-    var led1 = new five.Led(8);
-    var led2 = new five.Led(9);
-    var led3 = new five.Led(10);
-    var button = new five.Button(2);
-
-    var action = 'abort'; // or 'BOOM'
-    var steps = [];
-
-    led0.pulse();
-
-    button.on("down", function() {
-      led0.fadeOut();
-
-      steps[1] = setTimeout( () => {
-        led1.on();
-      },1000);
-
-      steps[2] = setTimeout( () => {
-        led2.on();
-      },2000);
-
-      steps[3] = setTimeout( () => {
-        led3.blink(50);
-      },3000);
-
-      steps[4] = setTimeout( () => {
-        action = "BOOM";
-        led1.off();
-        led2.off();
-        led3.stop().off();
-      },4000);
-    });
-
-    button.on("up", () => {
-      steps.forEach(t => clearTimeout(t));
-      [led1,led2].forEach(led => led.off());
-      led3.stop().off();
-      led0.pulse();
-      console.log(action);
-      if (action === 'BOOM') {
-        nukeInbox(auth);
-        spawn('open', ['https://www.youtube.com/watch?v=75GJ8gYYCJg&feature=youtu.be&t=1m45s&autoplay=1']);
-      }
-      action = 'abort';
-    });
-
-  });
-}
-
-
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
-var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
+var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
@@ -75,7 +18,7 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   }
   // Authorize a client with the loaded credentials, then call the
   // Gmail API.
-  authorize(JSON.parse(content), enterTheDangerZone);
+  authorize(JSON.parse(content), nukeInbox);
 });
 
 /**
@@ -153,66 +96,28 @@ function storeToken(token) {
 }
 
 /**
- * Lists the messages in the user's account.
+ * Lists the labels in the user's account.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function nukeInbox(auth) {
   var gmail = google.gmail('v1');
-  var messages = gmail.users.messages;
-  // messages.trash({
-  //   auth: auth,
-  //   userId: 'me',
-  //   id: '1565c4c4767af72a'
-  // });
- //  messages.list({
- //    auth: auth,
- //    userId: 'me',
- //  }, function(err, response) {
- //    if (err) {
- //      console.log('The API returned an error: ' + err);
- //      return;
- //    }
- //    var messages = response.messages;
- //    if (messages.length == 0) {
- //      console.log('No messages found.');
- //    } else {
- //      console.log('Messages:');
- //      for (var i = 0; i < messages.length; i++) {
- //        var message = messages[i];
- //        console.log('- %s', message.id);
- //        var request = messages.trash({
- //          auth: auth,
- //          'userId': 'me',
- //          'id': message.id
- //        });
- //        request.execute(function(resp) { });
- //      }
- //    }
- // });
-
-  messages.list({
+  gmail.users.labels.list({
     auth: auth,
-    userId: 'me'
-  }, (err, response) => {
+    userId: 'me',
+  }, function(err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
       return;
+    }
+    var labels = response.labels;
+    if (labels.length == 0) {
+      console.log('No labels found.');
     } else {
-      var resmessages = response.messages;
-      if (resmessages.length == 0) {
-        console.log('No messages found.');
-      } else {
-        console.log('Messages:');
-        for (var i = 0; i < resmessages.length; i++) {
-          var message = resmessages[i];
-          messages.trash({
-            auth: auth,
-            userId: 'me',
-            id: message.id
-          });
-          console.log('- %s', message.id);
-        }
+      console.log('Labels:');
+      for (var i = 0; i < labels.length; i++) {
+        var label = labels[i];
+        console.log('- %s', label.name);
       }
     }
   });
