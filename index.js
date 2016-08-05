@@ -2,11 +2,11 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
+var spawn = require('child_process').spawn;
+var five = require("johnny-five");
+var board = new five.Board();
 
 function enterTheDangerZone (auth) {
-  var spawn = require('child_process').spawn;
-  var five = require("johnny-five");
-  var board = new five.Board();
 
   board.on("ready", function() {
     var led0 = new five.Led(11);
