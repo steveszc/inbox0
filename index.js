@@ -51,7 +51,7 @@ function enterTheDangerZone (auth) {
       console.log(action);
       if (action === 'BOOM') {
         nukeInbox(auth);
-        spawn('open', ['https://www.youtube.com/watch?v=75GJ8gYYCJg&feature=youtu.be&t=1m45s&autoplay=1']);
+        spawn('open', ['https://www.youtube.com/embed/75GJ8gYYCJg?feature=youtu.be&start=105&autoplay=1']);
       }
       action = 'abort';
     });
