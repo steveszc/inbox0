@@ -18,22 +18,22 @@ board.on("ready", function() {
     led0.fadeOut();
 
     steps[1] = setTimeout( () => {
-        led1.on();
+      led1.on();
     },1000);
 
     steps[2] = setTimeout( () => {
-        led2.on();
+      led2.on();
     },2000);
 
     steps[3] = setTimeout( () => {
-        led3.blink(50);
+      led3.blink(50);
     },3000);
 
     steps[4] = setTimeout( () => {
-        action = "BOOM";
-        led1.off();
-        led2.off();
-        led3.stop().off();
+      action = "BOOM";
+      led1.off();
+      led2.off();
+      led3.stop().off();
     },4000);
   });
 
