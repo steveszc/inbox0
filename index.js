@@ -6,8 +6,7 @@ var spawn = require('child_process').spawn;
 var five = require("johnny-five");
 var board = new five.Board();
 
-function enterTheDangerZone (auth) {
-
+function armDevice (auth) {
   board.on("ready", function() {
     var led0 = new five.Led(11);
     var led1 = new five.Led(8);
@@ -61,11 +60,11 @@ function enterTheDangerZone (auth) {
 
 
 // If modifying these scopes, delete your previously saved credentials
-// at ~/.credentials/gmail-nodejs-quickstart.json
+// at ~/.credentials/inbox0.json
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
     process.env.USERPROFILE) + '/.credentials/';
-var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-quickstart.json';
+var TOKEN_PATH = TOKEN_DIR + 'inbox0.json';
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -75,7 +74,7 @@ fs.readFile('client_secret.json', function processClientSecrets(err, content) {
   }
   // Authorize a client with the loaded credentials, then call the
   // Gmail API.
-  authorize(JSON.parse(content), enterTheDangerZone);
+  authorize(JSON.parse(content), armDevice);
 });
 
 /**
@@ -116,12 +115,17 @@ function getNewToken(oauth2Client, callback) {
     access_type: 'offline',
     scope: SCOPES
   });
-  console.log('Authorize this app by visiting this url: ', authUrl);
+
+  try {
+    spawn('open', [authUrl]);
+  } catch {
+    console.log('Authorize this app by visiting this url: ', authUrl);
+  }
   var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
   });
-  rl.question('Enter the code from that page here: ', function(code) {
+  rl.question('Enter the code from that page url here: ', function(code) {
     rl.close();
     oauth2Client.getToken(code, function(err, token) {
       if (err) {
@@ -153,43 +157,13 @@ function storeToken(token) {
 }
 
 /**
- * Lists the messages in the user's account.
+ * Archive the messages in the user's account.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function nukeInbox(auth) {
   var gmail = google.gmail('v1');
   var messages = gmail.users.messages;
-  // messages.trash({
-  //   auth: auth,
-  //   userId: 'me',
-  //   id: '1565c4c4767af72a'
-  // });
- //  messages.list({
- //    auth: auth,
- //    userId: 'me',
- //  }, function(err, response) {
- //    if (err) {
- //      console.log('The API returned an error: ' + err);
- //      return;
- //    }
- //    var messages = response.messages;
- //    if (messages.length == 0) {
- //      console.log('No messages found.');
- //    } else {
- //      console.log('Messages:');
- //      for (var i = 0; i < messages.length; i++) {
- //        var message = messages[i];
- //        console.log('- %s', message.id);
- //        var request = messages.trash({
- //          auth: auth,
- //          'userId': 'me',
- //          'id': message.id
- //        });
- //        request.execute(function(resp) { });
- //      }
- //    }
- // });
 
   messages.list({
     auth: auth,
@@ -199,19 +173,16 @@ function nukeInbox(auth) {
       console.log('The API returned an error: ' + err);
       return;
     } else {
-      var resmessages = response.messages;
-      if (resmessages.length == 0) {
+      if (response.messages.length == 0) {
         console.log('No messages found.');
       } else {
-        console.log('Messages:');
-        for (var i = 0; i < resmessages.length; i++) {
-          var message = resmessages[i];
+        for (var i = 0; i < response.messages.length; i++) {
+          var message = response.messages[i];
           messages.trash({
             auth: auth,
             userId: 'me',
             id: message.id
           });
-          console.log('- %s', message.id);
         }
       }
     }
