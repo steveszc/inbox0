@@ -4,6 +4,7 @@ aka The Nuclear Option
 aka Inbox Zero as a Service
 
 Arduino button for instant inbox0 with gmail. Button archives all email in a connected gmail inbox.
+
 Requires nodeJS
 
 ## Step 1:
@@ -21,7 +22,7 @@ Your first time running you'll be asked to authenticate a gmail account
 **Warning:** Once you authenticate a gmail account, the device will become armed.
 
 ## Step 3:
-Wait until email inbox aggression has left you will no other option.
+Wait until email inbox aggression has left you with no other option but total annihilation.
 - A pulsing LED indicate the device is armed
 - Press and hold the button.
 - wait until the final LED blinks rapidly and then stops
